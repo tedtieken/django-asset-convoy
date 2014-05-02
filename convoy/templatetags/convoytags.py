@@ -96,7 +96,7 @@ CSS_TEMPLATE = u'<link rel="stylesheet" href="%s" >\n'
 JS_TEMPLATE  = u'<script type="text/javascript" src="%s" ></script>\n'
 START_COMMENT_TEMPLATE = u"\n<!-- %s -->\n"
 END_COMMENT_TEMPLATE = START_COMMENT_TEMPLATE
-CARPOOL_PATH_FRAGMENT = "CARPOOL"
+CARPOOL_PATH_FRAGMENT = getattr(settings, "CARPOOL_CACHE_PATH_FRAGMENT", "CARPOOL")
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.core.files.base import ContentFile
 from django.core.exceptions import ImproperlyConfigured
@@ -365,8 +365,6 @@ def carpool(parser, token):
             <link rel="stylesheet" href="/static/myapp/css/second.css' >
             <link rel="stylesheet" href="/static/myapp/css/third.css' >
             <!-- myapp/css/base.css+++myapp/css/second.css+++myapp/css/third.css -->
-        
-        In the case of a miss, enqueue the files to be concatenated
         
         {% carpool js %}
             "myapp/css/base.js"

@@ -27,9 +27,9 @@ except ImportError:
 from django.core.files.storage import get_storage_class
 
 CONVOY_USE_EXISTING_MIN_FILES = getattr(settings, "CONVOY_USE_EXISTING_MIN_FILES", False)
-STATIC_AWS_QUERYSTRING_AUTH = getattr(settings, 'STATIC_AWS_QUERYSTRING_AUTH', True)
-STATIC_AWS_HEADERS = getattr(settings, 'STATIC_AWS_HEADERS', {})
-LOCAL_CACHE_ROOT = getattr(settings, 'STATIC_LOCAL_CACHE_ROOT', getattr(settings, "STATIC_ROOT", ""))
+STATIC_AWS_QUERYSTRING_AUTH = getattr(settings, 'CONVOY_AWS_QUERYSTRING_AUTH', True)
+STATIC_AWS_HEADERS = getattr(settings, 'CONVOY_AWS_HEADERS', {})
+LOCAL_CACHE_ROOT = getattr(settings, 'CONVOY_LOCAL_CACHE_ROOT', getattr(settings, "STATIC_ROOT", ""))
 
 class S3LocalCachedMixin(object):
     """

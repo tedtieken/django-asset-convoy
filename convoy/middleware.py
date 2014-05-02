@@ -1,6 +1,8 @@
 from django.middleware.gzip import GZipMiddleware
 from django.conf import settings
 
+CONVOY_CONSERVATIVE_MSIE_GZIP = getattr(settings, "CONVOY_CONSERVATIVE_MSIE_GZIP", False)
+
 class GzipHttpOnlyMiddleware(object):
     '''
     Wraps django's default GZIP middleware to only GZIP HTTP Requests, not HTTPS
@@ -18,6 +20,10 @@ class GzipHttpOnlyMiddleware(object):
         self.gzip_middleware = GZipMiddleware(*args, **kwargs) 
     
     def process_response(self, request, response):
+        if CONVOY_CONSERVATIVE_MSIE_GZIP:
+            if "msie" in request.META.get('HTTP_USER_AGENT', '').lower():
+                return response
+        
         if request.scheme is 'https':
           return response
           
