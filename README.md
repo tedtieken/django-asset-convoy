@@ -51,7 +51,7 @@ Requirements:
     pip install rjsmin #recommended
     #or pip install jsmin
   
-Optional, but speeds up your pages even more: django-htmlmin
+Optional, but speeds up your pages even more: ```django-htmlmin```
 
 
 Configuration:
@@ -64,7 +64,7 @@ Configuration:
         ...
     )
     
-Option 1: Using the filesystem:
+##### Option 1: Using the filesystem:
 
     #settings.py
     STATICFILES_STORAGE = 'convoy.stores.ConvoyStorage'  
@@ -72,7 +72,7 @@ Option 1: Using the filesystem:
     #Set STATIC_ROOT, STATIC_URL, etc, as normal  
 
 
-Option 2: Using s3-folder-storage    
+##### Option 2: Using s3-folder-storage    
 
     #settings.py
     
@@ -95,7 +95,7 @@ Option 2: Using s3-folder-storage
 
 Backends are provided for s3 without s3-folder-storage, not recomended.
 
-Suggested configuration:
+##### Suggested configuration:
 
     #settings.py
     CONVOY_AWS_HEADERS = {
@@ -104,7 +104,7 @@ Suggested configuration:
     }
 
 
-Configuring the HTTP Only Gzip Middleware:
+##### Configuring the HTTP Only Gzip Middleware:
 
     #settings.py
     MIDDLEWARE_CLASSES = (
@@ -199,7 +199,7 @@ The ```carpool``` template tag is a concatenator, it works similarly to the ```c
 Optional configuration:
 ---------
     
-Settings you might want to change and their defaults:
+##### Settings you might want to change and their defaults:
 
 ``` CONVOY_USE_EXISTING_MIN_FILES = True``` Attempts to get the distributed min that matches a given filename e.g. if you have bootstrap.css, convoy would look for bootstrap.min.css if bootstrap.min.css is found, convoy will use bootstrap's minified version instead of minifiying the files itself
     
@@ -219,7 +219,7 @@ when False, returns the original, unprocessed, file
 ``` CARPOOL_DURING_REQUEST = True ``` Whether we should attempt to combine files during the request response cycle.  Currently serves as a way to turn off concatenation behavior In future will be part of the toggles to enable post-request processing
 
 
-Settings you're almost definitely not going to need:
+##### Settings you're almost definitely not going to need:
 
 ```CONVOY_CONSERVATIVE_MSIE_GZIP = False``` If set to True, will never attempt to serve gziped files to MSIE identified browsers. You are unlikely to need this unless you're writing your own subclasses that gzip more than just js and css files 
     
