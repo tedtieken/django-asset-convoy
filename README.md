@@ -19,7 +19,7 @@ The ```carpool``` template tag that does concatenation is extremely simple (see 
 
 You get automatic static asset management best practices for about five minutes of one-time configuration.  
 
-Speed
+Speed:
 ---------
 With static Your pages load faster.  Sometimes a lot faster.  
 
@@ -53,6 +53,7 @@ Requirements:
   
 Optional, but speeds up your pages even more: django-htmlmin
 
+
 Configuration:
 ---------
 
@@ -64,6 +65,7 @@ Configuration:
     )
     
 Option 1: Using the filesystem:
+
     #settings.py
     STATICFILES_STORAGE = 'convoy.stores.ConvoyStorage'  
     
@@ -71,6 +73,7 @@ Option 1: Using the filesystem:
 
 
 Option 2: Using s3-folder-storage    
+
     #settings.py
     
     #one of these
@@ -93,6 +96,8 @@ Option 2: Using s3-folder-storage
 Backends are provided for non s3-folder-storage use of s3, but it is not recomended.
 
 Suggested configuration:
+
+    #settings.py
     CONVOY_AWS_HEADERS = {
         #Cache processed assets for a full year 
         'Cache-Control': 'max-age=%s' % (60 * 60 * 24 * 365),
@@ -100,6 +105,7 @@ Suggested configuration:
 
 
 Configuring the HTTP Only Gzip Middleware:
+
     #settings.py
     MIDDLEWARE_CLASSES = (
         'convoy.middleware.GzipHttpOnlyMiddleware',
@@ -107,13 +113,10 @@ Configuring the HTTP Only Gzip Middleware:
     )
 
 
-Usage: 
-------------
 
-
-Using the automatic asset pipeline during collectstatic:
+Usage: automatic asset pipeline during collectstatic:
 ------------
-When you run ```python manage.py collectstatic``` convoy will automatically fingerprint (hash), minify, and gzip the static files that can be minified.  
+When you run ```python manage.py collectstatic``` convoy will automatically fingerprint (hash), minify the static files that can be minified, and gzip the css and js.  
 
 Then in your template ```{% load convoytags %}``` will get you two new tags ```convoy``` and ```carpool`` whose usage is as follows:
 
@@ -122,6 +125,7 @@ Then in your template ```{% load convoytags %}``` will get you two new tags ```c
 Using the ```convoy``` template tag
 ------------
 The ```convoy``` template tag works just like the ```static``` template tag provided by ```django.contrib.staticfiles```
+    
     Usage::
 
         {% convoy path [as varname] %}
@@ -134,11 +138,13 @@ The ```convoy``` template tag works just like the ```static``` template tag prov
         {% convoy variable_with_path as varname %}   
 
 A sample use in a template would be:
+
     mypage.html
     {% load convoytags %}
     <link rel="stylesheet" href="{% convoy "myapp/css/base.css" %}">    
 
 Would render:
+
     <!-- If gzip isn't supported by the request, or isn't enabled -->
     <link rel="stylesheet" href="/STATIC_ROOT/myapp/css/base.25b23dfca187.cmin.css" >
     
@@ -150,6 +156,7 @@ Would render:
 Using the ```carpool``` template tag
 ------------
 The ```carpool``` template tag is a concatenator, it works similarly to the ```compress``` tag in django-compressor.  
+
     Usage::
 
         {% carpool [js,css] %}
@@ -165,12 +172,12 @@ The ```carpool``` template tag is a concatenator, it works similarly to the ```c
             "myapp/css/third.css"
         {% endcarpool %}
         
-        If there were a concatenated, minified version, would render something like:
+        If concatenation and pipelining is successful:
             <!-- myapp/css/base.css+++myapp/css/second.css+++myapp/css/third.css -->
             <link rel="stylesheet" href="/static/CACHE/css/fb12a26e32dc.cmin.css' ">
             <!-- myapp/css/base.css+++myapp/css/second.css+++myapp/css/third.css -->
             
-        If not, would render:
+        If not, falls back to:
             <!-- myapp/css/base.css+++myapp/css/second.css+++myapp/css/third.css -->
             <link rel="stylesheet" href="/static/myapp/css/base.css' >
             <link rel="stylesheet" href="/static/myapp/css/second.css' >
@@ -259,5 +266,5 @@ Settings you're almost definitely not going to need:
 
     
     
-#NB: Don't set ```AWS_IS_GZIPPED = True```.  It will gzip the already gziped files a second time leading to uninteligible garbage.
+###NB: Don't set ```AWS_IS_GZIPPED = True```.  It will gzip the already gziped files a second time leading to uninteligible garbage.
 
