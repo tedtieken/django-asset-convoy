@@ -93,7 +93,7 @@ Option 2: Using s3-folder-storage
     STATIC_URL = 'http://%s.s3.amazonaws.com/static/' % AWS_STORAGE_BUCKET_NAME
     ADMIN_MEDIA_PREFIX = STATIC_URL + 'admin/'
 
-Backends are provided for non s3-folder-storage use of s3, but it is not recomended.
+Backends are provided for s3 without s3-folder-storage, not recomended.
 
 Suggested configuration:
 
@@ -174,7 +174,7 @@ The ```carpool``` template tag is a concatenator, it works similarly to the ```c
         
         If concatenation and pipelining is successful:
             <!-- myapp/css/base.css+++myapp/css/second.css+++myapp/css/third.css -->
-            <link rel="stylesheet" href="/static/CACHE/css/fb12a26e32dc.cmin.css' ">
+            <link rel="stylesheet" href="/static/CARPOOL/css/fb12a26e32dc.cmin.css' ">
             <!-- myapp/css/base.css+++myapp/css/second.css+++myapp/css/third.css -->
             
         If not, falls back to:
@@ -192,7 +192,7 @@ The ```carpool``` template tag is a concatenator, it works similarly to the ```c
 
         Would render something like:
             <!-- myapp/css/base.js+++myapp/css/second.js+++myapp/css/third.js -->
-            <script src="/static/CACHE/js/1fc48d23e7b6.cmin.js' >
+            <script src="/static/CARPOOL/js/1fc48d23e7b6.cmin.js' >
             <!-- myapp/css/base.js+++myapp/css/second.js+++myapp/css/third.js -->
 
 
@@ -201,70 +201,30 @@ Optional configuration:
     
 Settings you might want to change and their defaults:
 
-    #Attempts to get the distributed min that matches a given filename
-    # e.g. 
-    # if you have bootstrap.css, convoy would look for bootstrap.min.css 
-    # if bootstrap.min.css is found, convoy will use bootstrap's minified version
-    # instead of minifiying the files itself
-    CONVOY_USE_EXISTING_MIN_FILES = True
+``` CONVOY_USE_EXISTING_MIN_FILES = True``` Attempts to get the distributed min that matches a given filename e.g. if you have bootstrap.css, convoy would look for bootstrap.min.css if bootstrap.min.css is found, convoy will use bootstrap's minified version instead of minifiying the files itself
     
-    
-    # When True, returns processed files when DEBUG = True
-    # when False, returns the original, unprocessed, file
-    CONVOY_DURING_DEBUG = True
+``` CONVOY_DURING_DEBUG = True``` When True, returns processed files when DEBUG = True
+when False, returns the original, unprocessed, file
 
+``` CONVOY_GZIP_IN_TEMPLATE = True``` When True: checks if the request says it accepts gzip, and if so links to the gzip file from the template, this is useful for serving gziped files from AWS When False: returns the processed but not gziped version of the file
 
-    # When True
-    #    checks if the request says it accepts gzip, and if so
-    #    links to the gzip file from the template, this is useful for
-    #    serving gziped files from AWS
-    # When False
-    #    returns the processed but not gziped version of the file
-    CONVOY_GZIP_IN_TEMPLATE = True
+``` CONVOY_AWS_HEADERS = {}``` AWS headers for processed assets because convoyed assets go through a fingerprinting step, you can safely set far-future headers (so long as you don't link to the unprocessed assets in your templates)
     
+``` CONVOY_LOCAL_CACHE_ROOT = STATIC_ROOT``` If using a cached s3 storage, where do we store the cached files?
     
-    # AWS headers for processed assets
-    # because convoyed assets go through a fingerprinting step, you
-    # can safely set far-future headers (so long as you don't link to
-    # the unprocessed assets in your templates)
-    CONVOY_AWS_HEADERS = {
-        #Cache processed assets for a full year 
-        'Cache-Control': 'max-age=%s' % (60 * 60 * 24 * 365),
-    }
-    
-    # If using a cached s3 storage, where do we store the cached files?
-    CONVOY_LOCAL_CACHE_ROOT = STATIC_ROOT
-    
-    # Where should we the combined files?
-    # They will be stored at this path below STATIC_ROOT
-    CARPOOL_CACHE_PATH_FRAGMENT = "CARPOOL"
-    
-    # When set to True, concatenates the original, unprocessed, files instead
-    # of the pre-processed files.   
-    CARPOOL_COMBINE_ORIGINALS = False
+``` CARPOOL_CACHE_PATH_FRAGMENT = "CARPOOL" ``` Where should we the combined files? They will be stored at this path below STATIC_ROOT
+   
+``` CARPOOL_COMBINE_ORIGINALS = False ``` When set to True, concatenates the original, unprocessed, files instead of the pre-processed files.   
 
-    # Whether we should attempt to combine files during the request response cycle
-    # Currently serves as a way to turn off concatenation behavior
-    # In future will be part of the toggles to enable post-request processing
-    CARPOOL_DURING_REQUEST = True
+``` CARPOOL_DURING_REQUEST = True ``` Whether we should attempt to combine files during the request response cycle.  Currently serves as a way to turn off concatenation behavior In future will be part of the toggles to enable post-request processing
 
 
 Settings you're almost definitely not going to need:
 
-
-
-    # If set to True, will never attempt to serve gziped files to 
-    # MSIE identified browsers
-    # You are unlikely to need this unless you're writing your own subclasses
-    # that gzip more than just js and css files 
-    CONVOY_CONSERVATIVE_MSIE_GZIP = False
-
-    # Convoy is known to break if you set this to True -- don't
-    # We have a special file here so you can still use querystring  
-    # auth in your media files
-    CONVOY_AWS_QUERYSTRING_AUTH = False
-
+```CONVOY_CONSERVATIVE_MSIE_GZIP = False``` If set to True, will never attempt to serve gziped files to MSIE identified browsers. You are unlikely to need this unless you're writing your own subclasses that gzip more than just js and css files 
+    
+```CONVOY_AWS_QUERYSTRING_AUTH = False``` Convoy is known to break if you set this to True -- don't.  We have a special file here so you can still use querystring  auth in your media files if you want to.
     
     
-###NB: Don't set ```AWS_IS_GZIPPED = True```.  It will gzip the already gziped files a second time leading to uninteligible garbage.
+##### NB: Don't set ```AWS_IS_GZIPPED = True```.  It will gzip the already gziped files a second time leading to uninteligible garbage.
 
