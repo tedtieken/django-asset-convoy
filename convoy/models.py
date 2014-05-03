@@ -26,6 +26,8 @@ def new_collect(self, *args, **kwargs):
     '''
     Monkey Patches collect so we have a clean OrderedDict each time the command is run    
     This allows using the default manifest with our own cache keys
+    
+    To be removed once https://code.djangoproject.com/ticket/22557 is fixed
     '''
     if hasattr(self.storage, "manifest_name"):
         self.storage.hashed_files = OrderedDict()
