@@ -213,7 +213,7 @@ Optional configuration:
    
 ``` CARPOOL_COMBINE_ORIGINALS = False ``` When set to True, concatenates the original, unprocessed, files instead of the pre-processed files.   
 
-``` CARPOOL_DURING_REQUEST = True ``` Whether we should attempt to combine files during the request response cycle.  Currently serves as a way to turn off concatenation behavior In future will be part of the toggles to enable post-request processing
+``` CARPOOL_COMBINE_DURING_REQUEST = True ``` Whether we should attempt to combine files during the request response cycle.  Currently serves as a way to turn off concatenation behavior In future will be part of the toggles to enable post-request processing
 
 
 ##### Settings for when DEBUG=True
