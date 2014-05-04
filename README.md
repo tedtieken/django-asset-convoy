@@ -203,9 +203,6 @@ Optional configuration:
 
 ``` CONVOY_USE_EXISTING_MIN_FILES = True``` Attempts to get the distributed min that matches a given filename e.g. if you have bootstrap.css, convoy would look for bootstrap.min.css if bootstrap.min.css is found, convoy will use bootstrap's minified version instead of minifiying the files itself
     
-``` CONVOY_DURING_DEBUG = True``` When True, returns processed files when DEBUG = True
-when False, returns the original, unprocessed, file
-
 ``` CONVOY_GZIP_IN_TEMPLATE = True``` When True: checks if the request says it accepts gzip, and if so links to the gzip file from the template, this is useful for serving gziped files from AWS When False: returns the processed but not gziped version of the file
 
 ``` CONVOY_AWS_HEADERS = {}``` AWS headers for processed assets because convoyed assets go through a fingerprinting step, you can safely set far-future headers (so long as you don't link to the unprocessed assets in your templates)
@@ -217,6 +214,21 @@ when False, returns the original, unprocessed, file
 ``` CARPOOL_COMBINE_ORIGINALS = False ``` When set to True, concatenates the original, unprocessed, files instead of the pre-processed files.   
 
 ``` CARPOOL_DURING_REQUEST = True ``` Whether we should attempt to combine files during the request response cycle.  Currently serves as a way to turn off concatenation behavior In future will be part of the toggles to enable post-request processing
+
+
+##### Settings for when DEBUG=True
+
+``` CONVOY_DURING_DEBUG = False``` When True, returns processed files when DEBUG = Tru.  When CONVOY_DURING_DEBUG is False, returns the original, unprocessed, file
+
+NB:  Using CONVOY_DURING_DEBUG requires additional setup.  You must 
+
+* run collectstatic locally ```$ python manage.py collectstatic``` 
+* configure an explicit static serving url in your urls.py ```url(r'^static/(?P<path>.*)$', 'django.views.static.serve',{'document_root': settings.STATIC_ROOT})```
+* run runserver with the ```--nostatic``` option ```$ python manage.py runserver --nostatic``` 
+
+``` CARPOOL_DURING_DEBUG = False``` When True, concatenates files when DEBUG = True.  When CARPOOL_DURING_DEBUG is False, links to unprocessed, file.  To use this setting, you must set CONVOY_DURING_DEBUG to True.
+
+
 
 
 ##### Settings you're almost definitely not going to need:

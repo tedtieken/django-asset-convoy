@@ -6,6 +6,7 @@ from django.contrib.staticfiles.templatetags.staticfiles import StaticFilesNode,
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.middleware.gzip import re_accepts_gzip
 from collections import OrderedDict
+from django.core.exceptions import ImproperlyConfigured
 
 from django.conf import settings
 
@@ -15,8 +16,11 @@ CONVOY_DURING_DEBUG = getattr(settings, "CONVOY_DURING_DEBUG", False)
 CONVOY_CONSERVATIVE_MSIE_GZIP = getattr(settings, "CONVOY_CONSERVATIVE_MSIE_GZIP", False)
 #TODO, find a better name for CONVOY_GZIP_IN_TEMPLATE
 CONVOY_GZIP_IN_TEMPLATE = getattr(settings, "CONVOY_GZIP_IN_TEMPLATE", True)
+CARPOOL_DURING_DEBUG = getattr(settings, "CARPOOL_DURING_DEBUG", False)
 
-
+if settings.DEBUG and CARPOOL_DURING_DEBUG and not CONVOY_DURING_DEBUG:
+    raise ImproperlyConfigured("When DEBUG=True and CARPOOL_DURING_DEBUG=True, you must also set CONVOY_DURING_DEBUG=True")
+        
 def request_accepts_gzip(request):
     # MSIE has issues with gzipped response of various content types
     # but, if we're only gzipping text/css and javascript, we should be ok
@@ -272,7 +276,7 @@ class CarpoolNode(template.Node):
         self.compressed_file_name = None
         
     def resolve_paths_to_combine(self, paths):
-        convoyed_paths = []
+        convoyable_paths = []
         unconvoyable_paths = []
         
         for p in paths:
@@ -280,13 +284,13 @@ class CarpoolNode(template.Node):
             chain = convoy_chain(p, gzip=False)
             if chain:
                 if getattr(settings, "CARPOOL_COMBINE_ORIGINALS", False):
-                    convoyed_paths.append(chain[0])
+                    convoyable_paths.append(chain[0])
                 else:
-                    convoyed_paths.append(chain[-1])
+                    convoyable_paths.append(chain[-1])
             else:
                 unconvoyable_paths.append(path)
         
-        return convoyed_paths, unconvoyable_paths     
+        return convoyable_paths, unconvoyable_paths     
         
     def comment_key_in_cache(self, comment_key):
         storage = self.storage
@@ -304,27 +308,30 @@ class CarpoolNode(template.Node):
         node_text = self.nodelist.render(context)
         # if the line has content get just the path without whitespaces or quotes
         paths = [x.strip(' \'"\r') for x in node_text.split('\n') if bool(x.strip())]
-        convoyed_paths, unconvoyable_paths = self.resolve_paths_to_combine(paths)
-        comment_key = u"+++".join(convoyed_paths)
+        convoyable_paths, unconvoyable_paths = self.resolve_paths_to_combine(paths)
+        comment_key = u"+++".join(convoyable_paths)
         print comment_key
 
         out = START_COMMENT_TEMPLATE % comment_key
         
-        #TODO: clean this up, we're setting compressed_file_name by side effect
-        already_hashed = self.comment_key_in_cache(comment_key) 
-        self.compressed_file_name = already_hashed
-        if not already_hashed:
-            #Combine the if we can
-            self.compressed_file_name = concatenate_and_hash(convoyed_paths, comment_key, self.format)
-
-        if self.compressed_file_name:
-            if self.format == "css":
-                out += CSS_TEMPLATE % convoy_from_context(self.compressed_file_name, context) 
-            elif self.format == "js":
-                out += JS_TEMPLATE % convoy_from_context(self.compressed_file_name, context)
-        else:
-            #We couldn't compress for some reason, render all files separately
+        if settings.DEBUG and not CARPOOL_DURING_DEBUG:
             unconvoyable_paths = paths
+        else:             
+            #TODO: clean this up, we're setting compressed_file_name by side effect
+            already_hashed = self.comment_key_in_cache(comment_key) 
+            self.compressed_file_name = already_hashed
+            if not already_hashed:
+                #Combine the if we can
+                self.compressed_file_name = concatenate_and_hash(convoyable_paths, comment_key, self.format)
+
+            if self.compressed_file_name:
+                if self.format == "css":
+                    out += CSS_TEMPLATE % convoy_from_context(self.compressed_file_name, context) 
+                elif self.format == "js":
+                    out += JS_TEMPLATE % convoy_from_context(self.compressed_file_name, context)
+            else:
+                #We couldn't compress for some reason, render all files separately
+                unconvoyable_paths = paths
             
         for path in unconvoyable_paths: 
             if self.format == "css":
