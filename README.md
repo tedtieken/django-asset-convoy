@@ -215,6 +215,14 @@ Optional configuration:
 
 ``` CARPOOL_COMBINE_DURING_REQUEST = True ``` Whether we should attempt to combine files during the request response cycle.  Currently serves as a way to turn off concatenation behavior In future will be part of the toggles to enable post-request processing
 
+``` CARPOOL_CSS_TEMPLATE = u'<link rel="stylesheet" href="%s" >\n' ```  The unicode string to use when rendering a css asset path into an HTML tag. 
+
+``` CARPOOL_JS_TEMPLATE = u'<script type="text/javascript" src="%s" ></script>\n' ``` The unicode string to use when rendering a Javascript asset path into an HTML tag.
+
+``` CARPOOL_START_COMMENT_TEMPLATE = u"\n<!-- %s -->\n" ``` The HTML comment placed before carpool CSS or JS tags are rendered.  Can be set to a falsy value, if you don't want the comment to be added.
+
+``` CARPOOL_END_COMMENT_TEMPLATE = CARPOOL_START_COMMENT_TEMPLATE ``` The HTML comment placed after carpool CSS or JS tags are rendered.  Can be set to a falsy value, if you don't want the comment to be added.
+
 
 ##### Settings for when DEBUG=True
 
@@ -229,7 +237,7 @@ NB:  Using CONVOY_DURING_DEBUG requires additional setup.  You must
 ``` CARPOOL_COMBINE_DURING_DEBUG = False``` When True and DEBUG = True, ```carpool``` template tag will concatenates files.  To use this setting, you must set CONVOY_DURING_DEBUG to True.  When CARPOOL_COMBINE_DURING_DEBUG = False and DEBUG = True, ```carpool``` template tag renders each asset path into individual <link rel='stylesheet' href="..." > or <script type="text/javascript" src="..."></script> tags without concatenating them.  
 
 
-##### Settings you're almost definitely not going to need:
+##### Settings unlikely going to need:
 
 ```CONVOY_CONSERVATIVE_MSIE_GZIP = False``` If set to True, will never attempt to serve gziped files to MSIE identified browsers. You are unlikely to need this unless you're writing your own subclasses that gzip more than just js and css files 
     

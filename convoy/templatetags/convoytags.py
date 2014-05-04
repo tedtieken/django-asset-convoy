@@ -18,10 +18,10 @@ CARPOOL_COMBILE_DURING_REQUEST = getattr(settings, "CARPOOL_COMBINE_DURING_REQUE
 if settings.DEBUG and CARPOOL_COMBINE_DURING_DEBUG and not CONVOY_DURING_DEBUG:
     raise ImproperlyConfigured("When DEBUG=True and CARPOOL_COMBINE_DURING_DEBUG=True, you must also set CONVOY_DURING_DEBUG=True")
 
-CSS_TEMPLATE = u'<link rel="stylesheet" href="%s" >\n'
-JS_TEMPLATE  = u'<script type="text/javascript" src="%s" ></script>\n'
-START_COMMENT_TEMPLATE = u"\n<!-- %s -->\n"
-END_COMMENT_TEMPLATE = START_COMMENT_TEMPLATE
+CARPOOL_CSS_TEMPLATE = getattr(settings, "CARPOOL_CSS_TEMPLATE", u'<link rel="stylesheet" href="%s" >\n')
+CARPOOL_JS_TEMPLATE  = getattr(settings, "CARPOOL_JS_TEMPLATE", u'<script type="text/javascript" src="%s" ></script>\n')
+CARPOOL_START_COMMENT_TEMPLATE = getattr(settings, "CARPOOL_START_COMMENT_TEMPLATE", u"\n<!-- %s -->\n")
+CARPOOL_END_COMMENT_TEMPLATE = getattr(settings, "CARPOOL_END_COMMENT_TEMPLATE", START_COMMENT_TEMPLATE)
 
 
 register = template.Library()
@@ -88,9 +88,9 @@ class CarpoolNode(template.Node):
         
     def tag_for_filename(self, file_name, context):
         if self.format == "css":
-            return CSS_TEMPLATE % convoy_from_context(file_name, context) 
+            return CARPOOL_CSS_TEMPLATE % convoy_from_context(file_name, context) 
         elif self.format == "js":
-            return JS_TEMPLATE % convoy_from_context(file_name, context)
+            return CARPOOL_JS_TEMPLATE % convoy_from_context(file_name, context)
         
     def render(self, context):
         node_text = self.nodelist.render(context)
@@ -120,7 +120,7 @@ class CarpoolNode(template.Node):
                 unconvoyable_paths = paths
         
         # Part 2: rendering work
-        out = START_COMMENT_TEMPLATE % comment_key
+        out = CARPOOL_START_COMMENT_TEMPLATE % comment_key if CARPOOL_START_COMMENT_TEMPLATE else ""
         if not compressed_file_name:
             #We couldn't compress for some reason, render all files individually
             unconvoyable_paths = paths
@@ -131,7 +131,7 @@ class CarpoolNode(template.Node):
         # failed compression gets added individually
         for path in unconvoyable_paths: 
             out += self.tag_for_filename(path, context)
-        out += END_COMMENT_TEMPLATE % comment_key   
+        out += CARPOOL_END_COMMENT_TEMPLATE % comment_key if CARPOOL_END_COMMENT_TEMPLATE else ""
 
         return out
 
