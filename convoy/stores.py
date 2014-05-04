@@ -46,14 +46,14 @@ class S3LocalCachedMixin(object):
         return sname
         
     def _save(self, name, content, *args, **kwargs):
-        if hasattr(content, "seek"):
-            content.seek(0)        
+        # some configurations of s3 backend mutate the content in place 
+        # Esp when AWS_IS_GZIPPED = True
+        # keep a pre-mutation copy for the local cache so we don't save garbage to disk
+        orig_content = copy.copy(content)
         sname = super(S3LocalCachedMixin, self)._save(name, content, *args, **kwargs)
         if self._local.exists(name):
             self._local.delete(name)
-        if hasattr(content, "seek"):
-            content.seek(0)
-        lname = self._local._save(name, content, *args, **kwargs)
+        lname = self._local._save(name, orig_content, *args, **kwargs)
         return name        
         
     def delete(self, *args, **kwargs):
@@ -352,14 +352,18 @@ class S3ConvoyMixin(object):
         #      ?? is this a good idea?
         
         self._orig_headers = self.headers.copy()
+        self._orig_gzip = self.gzip
         if self._is_gzip_file(name):
             self.headers.update({
                     'Content-Encoding': 'gzip',
                     #http://gtmetrix.com/specify-a-vary-accept-encoding-header.html 
                     'Vary': "Accept-Encoding", 
                 })
+            #Don't let s3 storage gzip it a second time
+            self.gzip = False
         sname = super(S3ConvoyMixin, self)._save(name, content, *args, **kwargs)
         self.headers = self._orig_headers
+        self.gzip = self._orig_gzip
         return sname
     
 

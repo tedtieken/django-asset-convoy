@@ -218,7 +218,7 @@ Optional configuration:
 
 ##### Settings for when DEBUG=True
 
-``` CONVOY_DURING_DEBUG = False``` When True and DEBUG=True, ```convoy``` template tag returns processed file urls for each asset path (e.g. 'myfile.css' becomes 'myfile.fb12a26e32dc.cmin.css').  When CONVOY_DURING_DEBUG is False and DEBUG = True, ```convoy``` template tag returns the url to the original, unprocessed, file (e.g. 'myfile.css' stays 'myfile.css')
+``` CONVOY_DURING_DEBUG = False``` When True and DEBUG=True, ```convoy``` template tag returns processed file urls for each asset path (e.g. 'myfile.css' becomes 'myfile.fb12a26e32dc.cmin.css').  When CONVOY_DURING_DEBUG = False and DEBUG = True, ```convoy``` template tag returns the url to the original, unprocessed, file (e.g. 'myfile.css' stays 'myfile.css')
 
 NB:  Using CONVOY_DURING_DEBUG requires additional setup.  You must 
 
@@ -226,7 +226,7 @@ NB:  Using CONVOY_DURING_DEBUG requires additional setup.  You must
 * configure an explicit static serving url in your urls.py ```url(r'^static/(?P<path>.*)$', 'django.views.static.serve',{'document_root': settings.STATIC_ROOT})```
 * run runserver with the ```--nostatic``` option ```$ python manage.py runserver --nostatic``` 
 
-``` CARPOOL_COMBINE_DURING_DEBUG = False``` When True and DEBUG = True, ```carpool``` template tag will concatenates files.  To use this setting, you must set CONVOY_DURING_DEBUG to True.  When CARPOOL_COMBINE_DURING_DEBUG is False and DEBUG = True, ```carpool``` template tag renders each asset path into individual <link rel='stylesheet' href="..." > or <script type="text/javascript" src="..."></script> tags, it just doesn't concatenating them.  
+``` CARPOOL_COMBINE_DURING_DEBUG = False``` When True and DEBUG = True, ```carpool``` template tag will concatenates files.  To use this setting, you must set CONVOY_DURING_DEBUG to True.  When CARPOOL_COMBINE_DURING_DEBUG = False and DEBUG = True, ```carpool``` template tag renders each asset path into individual <link rel='stylesheet' href="..." > or <script type="text/javascript" src="..."></script> tags without concatenating them.  
 
 
 ##### Settings you're almost definitely not going to need:
@@ -234,7 +234,3 @@ NB:  Using CONVOY_DURING_DEBUG requires additional setup.  You must
 ```CONVOY_CONSERVATIVE_MSIE_GZIP = False``` If set to True, will never attempt to serve gziped files to MSIE identified browsers. You are unlikely to need this unless you're writing your own subclasses that gzip more than just js and css files 
     
 ```CONVOY_AWS_QUERYSTRING_AUTH = False``` Convoy is known to break if you set this to True -- don't.  We have a special file here so you can still use querystring  auth in your media files if you want to.
-    
-    
-##### NB: Don't set ```AWS_IS_GZIPPED = True```.  It will gzip the already gziped files a second time leading to uninteligible garbage.
-
