@@ -27,9 +27,9 @@ except ImportError:
 from django.core.files.storage import get_storage_class
 
 CONVOY_USE_EXISTING_MIN_FILES = getattr(settings, "CONVOY_USE_EXISTING_MIN_FILES", False)
-STATIC_AWS_QUERYSTRING_AUTH = getattr(settings, 'CONVOY_AWS_QUERYSTRING_AUTH', True)
-STATIC_AWS_HEADERS = getattr(settings, 'CONVOY_AWS_HEADERS', {})
-LOCAL_CACHE_ROOT = getattr(settings, 'CONVOY_LOCAL_CACHE_ROOT', getattr(settings, "STATIC_ROOT", ""))
+CONVOY_AWS_QUERYSTRING_AUTH = getattr(settings, 'CONVOY_AWS_QUERYSTRING_AUTH', True)
+CONVOY_AWS_HEADERS = getattr(settings, 'CONVOY_AWS_HEADERS', {})
+CONVOY_LOCAL_CACHE_ROOT = getattr(settings, 'CONVOY_LOCAL_CACHE_ROOT', getattr(settings, "STATIC_ROOT", ""))
 
 class S3LocalCachedMixin(object):
     """
@@ -37,7 +37,7 @@ class S3LocalCachedMixin(object):
     """
     def __init__(self, *args, **kwargs):
         super(S3LocalCachedMixin, self).__init__(*args, **kwargs)
-        self._local = StaticFilesStorage(location=LOCAL_CACHE_ROOT)
+        self._local = StaticFilesStorage(location=CONVOY_LOCAL_CACHE_ROOT)
 
     def save(self, name, content, *args, **kwargs):
         if not hasattr(content, 'chunks'):
@@ -338,8 +338,8 @@ class S3ConvoyMixin(object):
     #TODO write a test that fails if our assumptions of S3BotoStorage change
     def __init__(self, *args, **kwargs):
         super(S3ConvoyMixin, self).__init__(*args, **kwargs)
-        self.querystring_auth = STATIC_AWS_QUERYSTRING_AUTH 
-        self.headers = STATIC_AWS_HEADERS
+        self.querystring_auth = CONVOY_AWS_QUERYSTRING_AUTH 
+        self.headers = CONVOY_AWS_HEADERS
         
     def _save(self, name, content, *args, **kwargs):
         ''' 
