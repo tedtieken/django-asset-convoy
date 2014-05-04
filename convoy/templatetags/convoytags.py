@@ -16,10 +16,10 @@ CONVOY_DURING_DEBUG = getattr(settings, "CONVOY_DURING_DEBUG", False)
 CONVOY_CONSERVATIVE_MSIE_GZIP = getattr(settings, "CONVOY_CONSERVATIVE_MSIE_GZIP", False)
 #TODO, find a better name for CONVOY_GZIP_IN_TEMPLATE
 CONVOY_GZIP_IN_TEMPLATE = getattr(settings, "CONVOY_GZIP_IN_TEMPLATE", True)
-CARPOOL_DURING_DEBUG = getattr(settings, "CARPOOL_DURING_DEBUG", False)
+CARPOOL_COMPRESS_DURING_DEBUG = getattr(settings, "CARPOOL_COMPRESS_DURING_DEBUG", False)
 
-if settings.DEBUG and CARPOOL_DURING_DEBUG and not CONVOY_DURING_DEBUG:
-    raise ImproperlyConfigured("When DEBUG=True and CARPOOL_DURING_DEBUG=True, you must also set CONVOY_DURING_DEBUG=True")
+if settings.DEBUG and CARPOOL_COMPRESS_DURING_DEBUG and not CONVOY_DURING_DEBUG:
+    raise ImproperlyConfigured("When DEBUG=True and CARPOOL_COMPRESS_DURING_DEBUG=True, you must also set CONVOY_DURING_DEBUG=True")
         
 def request_accepts_gzip(request):
     # MSIE has issues with gzipped response of various content types
@@ -314,7 +314,7 @@ class CarpoolNode(template.Node):
 
         out = START_COMMENT_TEMPLATE % comment_key
         
-        if settings.DEBUG and not CARPOOL_DURING_DEBUG:
+        if settings.DEBUG and not CARPOOL_COMPRESS_DURING_DEBUG:
             unconvoyable_paths = paths
         else:             
             #TODO: clean this up, we're setting compressed_file_name by side effect

@@ -14,13 +14,13 @@ import copy
 # HttpResponse.close = new_close
   
 
-# Create your models here.
-
-
-from django.contrib.staticfiles.management.commands import collectstatic
+from django.contrib.staticfiles.management.commands import collectstatic, runserver
+from django.core.management.base import CommandError
 from collections import OrderedDict
+from django.conf import settings
 
 orig_collect = collectstatic.Command.collect
+orig_run = runserver.Command.run
 
 def new_collect(self, *args, **kwargs):
     '''
@@ -34,3 +34,22 @@ def new_collect(self, *args, **kwargs):
     return orig_collect(self, *args, **kwargs)
 
 collectstatic.Command.collect = new_collect
+
+runserver_error_message = """When CONVOY_DURING_DEBUG is set to True, you must
+* run runserver with the --nostatic option: $ python manage.py runserver --nostatic
+* run collectstatic each time your static files change
+* configure an explicit static serving url in your urls.py: e.g. url(r'^static/(?P<path>.*)$', 'django.views.static.serve',{'document_root': settings.STATIC_ROOT}'
+"""
+
+def new_run(self, *args, **kwargs):
+    '''
+    Monkey patches collectstatic's runserver to warn when a bad set of settigns are given
+    '''
+    
+    if settings.DEBUG:
+      if getattr(settings, 'CONVOY_DURING_DEBUG', False):
+        if kwargs.get('use_static_handler', True):
+          raise CommandError(runserver_error_message)
+    return orig_run(self, *args, **kwargs) 
+
+runserver.Command.run = new_run   

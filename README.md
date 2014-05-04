@@ -226,9 +226,9 @@ NB:  Using CONVOY_DURING_DEBUG requires additional setup.  You must
 * configure an explicit static serving url in your urls.py ```url(r'^static/(?P<path>.*)$', 'django.views.static.serve',{'document_root': settings.STATIC_ROOT})```
 * run runserver with the ```--nostatic``` option ```$ python manage.py runserver --nostatic``` 
 
-``` CARPOOL_DURING_DEBUG = False``` When True, concatenates files when DEBUG = True.  When CARPOOL_DURING_DEBUG is False, links to unprocessed, file.  To use this setting, you must set CONVOY_DURING_DEBUG to True.
+``` CARPOOL_COMPRESS_DURING_DEBUG = False``` When True, concatenates files when DEBUG = True.  When CARPOOL_COMPRESS_DURING_DEBUG is False, links to unprocessed, file.  To use this setting, you must set CONVOY_DURING_DEBUG to True.
 
-
+NB: even when CARPOOL_COMPRESS_DURING_DEBUG is set to False, carpool will still render asset paths into <link rel=stylesheet> and <script src="..."></script> tags.
 
 
 ##### Settings you're almost definitely not going to need:
