@@ -192,7 +192,7 @@ The ```carpool``` template tag is a concatenator, it works similarly to the ```c
 
         Would render something like:
             <!-- myapp/css/base.js+++myapp/css/second.js+++myapp/css/third.js -->
-            <script src="/static/CARPOOL/js/1fc48d23e7b6.cmin.js' >
+            <script type="text/javascript" src="/static/CARPOOL/js/1fc48d23e7b6.cmin.js' >
             <!-- myapp/css/base.js+++myapp/css/second.js+++myapp/css/third.js -->
 
 
@@ -218,7 +218,7 @@ Optional configuration:
 
 ##### Settings for when DEBUG=True
 
-``` CONVOY_DURING_DEBUG = False``` When True, returns processed files when DEBUG = Tru.  When CONVOY_DURING_DEBUG is False, returns the original, unprocessed, file
+``` CONVOY_DURING_DEBUG = False``` When True and DEBUG=True, ```convoy``` template tag returns processed file urls for each asset path (e.g. 'myfile.css' becomes 'myfile.fb12a26e32dc.cmin.css').  When CONVOY_DURING_DEBUG is False and DEBUG = True, ```convoy``` template tag returns the url to the original, unprocessed, file (e.g. 'myfile.css' stays 'myfile.css')
 
 NB:  Using CONVOY_DURING_DEBUG requires additional setup.  You must 
 
@@ -226,7 +226,7 @@ NB:  Using CONVOY_DURING_DEBUG requires additional setup.  You must
 * configure an explicit static serving url in your urls.py ```url(r'^static/(?P<path>.*)$', 'django.views.static.serve',{'document_root': settings.STATIC_ROOT})```
 * run runserver with the ```--nostatic``` option ```$ python manage.py runserver --nostatic``` 
 
-``` CARPOOL_COMPRESS_DURING_DEBUG = False``` When True, concatenates files when DEBUG = True.  To use this setting, you must set CONVOY_DURING_DEBUG to True.  When CARPOOL_COMPRESS_DURING_DEBUG is False, renders asset paths into <link rel=stylesheet> and <script src="..."></script> tags without concatenating them.  
+``` CARPOOL_COMBINE_DURING_DEBUG = False``` When True and DEBUG = True, ```carpool``` template tag will concatenates files.  To use this setting, you must set CONVOY_DURING_DEBUG to True.  When CARPOOL_COMBINE_DURING_DEBUG is False and DEBUG = True, ```carpool``` template tag renders each asset path into individual <link rel='stylesheet' href="..." > or <script type="text/javascript" src="..."></script> tags, it just doesn't concatenating them.  
 
 
 ##### Settings you're almost definitely not going to need:
