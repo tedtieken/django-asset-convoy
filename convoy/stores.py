@@ -1,17 +1,18 @@
-from s3_folder_storage.s3 import StaticStorage as S3FolderStaticStorage, FixedS3BotoStorage as S3BotoStorage
-from collections import OrderedDict
-import json
+from django.conf import settings
 from django.contrib.staticfiles.storage import StaticFilesStorage, HashedFilesMixin, ManifestFilesMixin
-from django.core.files.storage import FileSystemStorage
+from django.contrib.staticfiles.utils import matches_patterns
 from django.core.files.base import ContentFile
 from django.core.files import File
-from django.conf import settings
 from django.utils.six.moves.urllib.parse import unquote
 
-from django.contrib.staticfiles.utils import matches_patterns
+from s3_folder_storage.s3 import StaticStorage as S3FolderStaticStorage
+from s3_folder_storage.s3 import FixedS3BotoStorage as S3BotoStorage
+
+from collections import OrderedDict
 from io import BytesIO
 import copy
 import gzip
+import json
 
 import cssmin
 try:
@@ -23,8 +24,6 @@ except ImportError:
         from jsmin import jsmin as _jsmin
         def jsmin(string, *args, **kwargs):
             return _jsmin(string)
-
-from django.core.files.storage import get_storage_class
 
 CONVOY_USE_EXISTING_MIN_FILES = getattr(settings, "CONVOY_USE_EXISTING_MIN_FILES", False)
 CONVOY_AWS_QUERYSTRING_AUTH = getattr(settings, 'CONVOY_AWS_QUERYSTRING_AUTH', True)
@@ -41,7 +40,7 @@ class S3LocalCachedMixin(object):
 
     def save(self, name, content, *args, **kwargs):
         if not hasattr(content, 'chunks'):
-            content = File(content)              
+            content = ContentFile(content)              
         sname = self._save(name, content, *args, **kwargs)
         return sname
         
