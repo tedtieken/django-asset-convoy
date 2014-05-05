@@ -1,5 +1,3 @@
-This code works but, man some of it is ugly.
-
 Rationale:
 ---------
 ```django-asset-convoy``` makes static asset best practices nearly effortless without changing your current workflow.  Your files are processed for you when you run collectstatic, and the template tags to access your processed files are easy to use.
@@ -21,7 +19,7 @@ You get automatic static asset management best practices for about five minutes 
 
 Speed:
 ---------
-With static Your pages load faster.  Sometimes a lot faster.  
+With convoy, your pages load faster.  Sometimes a lot faster.  
 
 In initial tests with heroku and s3, using ```convoy``` and ```carpool``` sped up DocumentReady times from ~1500 milliseconds average to 546 milliseconds average.  (Google's homepage by hit DocumentReady in 341ms average).  Method: Middle 8 of 10 page loads measured without caching by chrome devtools.  GTmetrix performance reports went from 91%/78% to 99%/98%.  
 
