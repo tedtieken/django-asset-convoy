@@ -15,6 +15,7 @@ CONVOY_DURING_DEBUG = getattr(settings, "CONVOY_DURING_DEBUG", False)
 #TODO, find a better name for CONVOY_GZIP_IN_TEMPLATE
 CONVOY_GZIP_IN_TEMPLATE = getattr(settings, "CONVOY_GZIP_IN_TEMPLATE", True)
 CONVOY_CONSERVATIVE_MSIE_GZIP = getattr(settings, "CONVOY_CONSERVATIVE_MSIE_GZIP", False)
+CARPOOL_PATH_FRAGMENT = getattr(settings, "CARPOOL_CACHE_PATH_FRAGMENT", "CARPOOL")
 
 URL_PATTERN = re.compile(r'url\(([^\)]+)\)')
 SRC_PATTERN = re.compile(r'src=([\'"])(.+?)\1')
@@ -168,7 +169,6 @@ def request_accepts_gzip(request):
     ae = request.META.get('HTTP_ACCEPT_ENCODING', '')
     if re_accepts_gzip.search(ae):
         return True
-    
     return False
 
 

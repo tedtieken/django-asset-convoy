@@ -21,7 +21,7 @@ if settings.DEBUG and CARPOOL_COMBINE_DURING_DEBUG and not CONVOY_DURING_DEBUG:
 CARPOOL_CSS_TEMPLATE = getattr(settings, "CARPOOL_CSS_TEMPLATE", u'<link rel="stylesheet" href="%s" >\n')
 CARPOOL_JS_TEMPLATE  = getattr(settings, "CARPOOL_JS_TEMPLATE", u'<script type="text/javascript" src="%s" ></script>\n')
 CARPOOL_START_COMMENT_TEMPLATE = getattr(settings, "CARPOOL_START_COMMENT_TEMPLATE", u"\n<!-- %s -->\n")
-CARPOOL_END_COMMENT_TEMPLATE = getattr(settings, "CARPOOL_END_COMMENT_TEMPLATE", START_COMMENT_TEMPLATE)
+CARPOOL_END_COMMENT_TEMPLATE = getattr(settings, "CARPOOL_END_COMMENT_TEMPLATE", CARPOOL_START_COMMENT_TEMPLATE)
 
 
 register = template.Library()
