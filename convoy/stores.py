@@ -72,7 +72,9 @@ class S3LocalCachedMixin(object):
             if hasattr(the_file, "seek"):
                 the_file.seek(0)
             return the_file
-
+    
+    def local_path(self, *args, **kwargs):
+        return self._local.path(*args, **kwargs)
 
 class ChainableHashedFilesMixin(HashedFilesMixin):
     _should_hash = True
