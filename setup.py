@@ -1,12 +1,13 @@
 import os
-from distutils.core import setup
+from setuptools import setup
 
 description = 'Asset packager for heroku/s3-hosted Django applications'
 try:
-   import pypandoc
-   long_description = pypandoc.convert('README.md', 'rst')
+    import pypandoc
+    long_description = pypandoc.convert('README.md', 'rst')
 except (IOError, ImportError):
-   long_description = description
+    print "ioerror or importerror"
+    long_description = description
 
 setup(
     name='django-asset-convoy',

@@ -240,3 +240,8 @@ NB:  Using CONVOY_DURING_DEBUG requires additional setup.  You must
 ```CONVOY_CONSERVATIVE_MSIE_GZIP = False``` If set to True, will never attempt to serve gziped files to MSIE identified browsers. You are unlikely to need this unless you're writing your own subclasses that gzip more than just js and css files 
     
 ```CONVOY_AWS_QUERYSTRING_AUTH = False``` Convoy is known to break if you set this to True -- don't.  We have a special file here so you can still use querystring  auth in your media files if you want to.
+
+
+### Development setup
+
+Requires pandoc [https://github.com/jgm/pandoc/releases](https://github.com/jgm/pandoc/releases)
