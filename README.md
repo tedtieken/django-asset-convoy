@@ -1,6 +1,8 @@
+
 Rationale:
 ---------
-```django-asset-convoy``` makes static asset best practices nearly effortless without changing your current workflow.  Your files are processed for you when you run collectstatic, and the template tags to access your processed files are easy to use.
+
+`django-asset-convoy` makes static asset best practices nearly effortless without changing your current workflow.  Your files are processed for you when you run collectstatic, and the template tags to access your processed files are easy to use.
 
 Static asset best practices = Faster page loads = happier customers. 
 
@@ -9,11 +11,11 @@ Static asset best practices = Faster page loads = happier customers.
 * gzipping that works on S3 (compressed files load faster)
 * concatenation (fewer http requests means less latency and faster page loads)
 
-Everything but concatenation is done automatically during the post_process step of django's ```python manage.py collectstatic``` command.  This means that when Heroku runs collectstatic automatically for you, your assets get post-processed automatically too!  
+Everything but concatenation is done automatically during the post_process step of django's `python manage.py collectstatic` command.  This means that when Heroku runs collectstatic automatically for you, your assets get post-processed automatically too!  
 
-The  ```convoy``` template tag is called exactly the same way the staticfiles ```static``` template tag is called.
+The  `convoy` template tag is called exactly the same way the staticfiles `static` template tag is called.
 
-The ```carpool``` template tag that does concatenation is extremely simple (see below).
+The `carpool` template tag that does concatenation is extremely simple (see below).
 
 You get automatic static asset management best practices for about five minutes of one-time configuration.  
 
@@ -21,7 +23,7 @@ Speed:
 ---------
 With convoy, your pages load faster.  Sometimes a lot faster.  
 
-In initial tests with heroku and s3, using ```convoy``` and ```carpool``` sped up DocumentReady times from ~1500 milliseconds average to 546 milliseconds average.  (Google's homepage by hit DocumentReady in 341ms average).  Method: Middle 8 of 10 page loads measured without caching by chrome devtools.  GTmetrix performance reports went from 91%/78% to 99%/98%.  
+In initial tests with heroku and s3, using `convoy` and `carpool` sped up DocumentReady times from ~1500 milliseconds average to 546 milliseconds average.  (Google's homepage by hit DocumentReady in 341ms average).  Method: Middle 8 of 10 page loads measured without caching by chrome devtools.  GTmetrix performance reports went from 91%/78% to 99%/98%.  
 
 More tests pending.
 
@@ -33,8 +35,8 @@ django-asset-convoy has a few parts:
 
 *  static asset storages that automatically process your static assets when you run collectstatic  (fingerprinting/cache-busting with a hash, minifing, and gziping)
 *  caching s3 storages that keep a copy on the local filesystem as well as saving on s3 (meaning in-request concatenation goes a lot faster)
-*  ```convoy``` template tag that resolves a resource to its processed counterpartd 
-*  ```carpool``` template tag that concatenates css and js files so they can be served by a single http request.
+*  `convoy` template tag that resolves a resource to its processed counterpartd 
+*  `carpool` template tag that concatenates css and js files so they can be served by a single http request.
 * A GzipHttpOnlyMiddleware that sidesteps the BREACH security vulnerability on secure HTTPS pages while allowing gzip performance improvements on HTTP pages
 
 
@@ -49,7 +51,7 @@ Requirements:
     pip install rjsmin #recommended
     #or pip install jsmin
   
-Optional, but speeds up your pages even more: ```django-htmlmin```
+Optional, but speeds up your pages even more: `django-htmlmin`
 
 
 Configuration:
@@ -114,15 +116,15 @@ Backends are provided for s3 without s3-folder-storage, not recomended.
 
 Usage: automatic asset pipeline during collectstatic:
 ------------
-When you run ```python manage.py collectstatic``` convoy will automatically fingerprint (hash), minify the static files that can be minified, and gzip the css and js.  
+When you run `python manage.py collectstatic` convoy will automatically fingerprint (hash), minify the static files that can be minified, and gzip the css and js.  
 
-Then in your template ```{% load convoytags %}``` will get you two new tags ```convoy``` and ```carpool`` whose usage is as follows:
+Then in your template `{% load convoytags %}` will get you two new tags `convoy` and `carpool` whose usage is as follows:
 
 
 
-Using the ```convoy``` template tag
+Using the `convoy` template tag
 ------------
-The ```convoy``` template tag works just like the ```static``` template tag provided by ```django.contrib.staticfiles```
+The `convoy` template tag works just like the `static` template tag provided by `django.contrib.staticfiles`
     
     Usage::
 
@@ -151,9 +153,9 @@ Would render:
 
 
 
-Using the ```carpool``` template tag
+Using the `carpool` template tag
 ------------
-The ```carpool``` template tag is a concatenator, it works similarly to the ```compress``` tag in django-compressor.  
+The `carpool` template tag is a concatenator, it works similarly to the `compress` tag in django-compressor.  
 
     Usage::
 
@@ -199,47 +201,47 @@ Optional configuration:
     
 ##### Settings you might want to change and their defaults:
 
-``` CONVOY_USE_EXISTING_MIN_FILES = True``` Attempts to get the distributed min that matches a given filename e.g. if you have bootstrap.css, convoy would look for bootstrap.min.css if bootstrap.min.css is found, convoy will use bootstrap's minified version instead of minifiying the files itself
+` CONVOY_USE_EXISTING_MIN_FILES = True` Attempts to get the distributed min that matches a given filename e.g. if you have bootstrap.css, convoy would look for bootstrap.min.css if bootstrap.min.css is found, convoy will use bootstrap's minified version instead of minifiying the files itself
     
-``` CONVOY_GZIP_IN_TEMPLATE = True``` When True: checks if the request says it accepts gzip, and if so links to the gzip file from the template, this is useful for serving gziped files from AWS When False: returns the processed but not gziped version of the file
+` CONVOY_GZIP_IN_TEMPLATE = True` When True: checks if the request says it accepts gzip, and if so links to the gzip file from the template, this is useful for serving gziped files from AWS When False: returns the processed but not gziped version of the file
 
-``` CONVOY_AWS_HEADERS = {}``` AWS headers for processed assets because convoyed assets go through a fingerprinting step, you can safely set far-future headers (so long as you don't link to the unprocessed assets in your templates)
+` CONVOY_AWS_HEADERS = {}` AWS headers for processed assets because convoyed assets go through a fingerprinting step, you can safely set far-future headers (so long as you don't link to the unprocessed assets in your templates)
     
-``` CONVOY_LOCAL_CACHE_ROOT = STATIC_ROOT``` If using a cached s3 storage, where do we store the cached files?
+` CONVOY_LOCAL_CACHE_ROOT = STATIC_ROOT` If using a cached s3 storage, where do we store the cached files?
     
-``` CARPOOL_CACHE_PATH_FRAGMENT = "CARPOOL" ``` Where should we the combined files? They will be stored at this path below STATIC_ROOT
+` CARPOOL_CACHE_PATH_FRAGMENT = "CARPOOL" ` Where should we the combined files? They will be stored at this path below STATIC_ROOT
    
-``` CARPOOL_COMBINE_ORIGINALS = False ``` When set to True, concatenates the original, unprocessed, files instead of the pre-processed files.   
+` CARPOOL_COMBINE_ORIGINALS = False ` When set to True, concatenates the original, unprocessed, files instead of the pre-processed files.   
 
-``` CARPOOL_COMBINE_DURING_REQUEST = True ``` Whether we should attempt to combine files during the request response cycle.  Currently serves as a way to turn off concatenation behavior In future will be part of the toggles to enable post-request processing
+` CARPOOL_COMBINE_DURING_REQUEST = True ` Whether we should attempt to combine files during the request response cycle.  Currently serves as a way to turn off concatenation behavior In future will be part of the toggles to enable post-request processing
 
-``` CARPOOL_CSS_TEMPLATE = u'<link rel="stylesheet" href="%s" >\n' ```  The unicode string to use when rendering a css asset path into an HTML tag. 
+` CARPOOL_CSS_TEMPLATE = u'<link rel="stylesheet" href="%s" >\n' `  The unicode string to use when rendering a css asset path into an HTML tag. 
 
-``` CARPOOL_JS_TEMPLATE = u'<script type="text/javascript" src="%s" ></script>\n' ``` The unicode string to use when rendering a Javascript asset path into an HTML tag.
+` CARPOOL_JS_TEMPLATE = u'<script type="text/javascript" src="%s" ></script>\n' ` The unicode string to use when rendering a Javascript asset path into an HTML tag.
 
-``` CARPOOL_START_COMMENT_TEMPLATE = u"\n<!-- %s -->\n" ``` The HTML comment placed before carpool CSS or JS tags are rendered.  Can be set to a falsy value, if you don't want the comment to be added.
+` CARPOOL_START_COMMENT_TEMPLATE = u"\n<!-- %s -->\n" ` The HTML comment placed before carpool CSS or JS tags are rendered.  Can be set to a falsy value, if you don't want the comment to be added.
 
-``` CARPOOL_END_COMMENT_TEMPLATE = CARPOOL_START_COMMENT_TEMPLATE ``` The HTML comment placed after carpool CSS or JS tags are rendered.  Can be set to a falsy value, if you don't want the comment to be added.
+` CARPOOL_END_COMMENT_TEMPLATE = CARPOOL_START_COMMENT_TEMPLATE ` The HTML comment placed after carpool CSS or JS tags are rendered.  Can be set to a falsy value, if you don't want the comment to be added.
 
 
 ##### Settings for when DEBUG=True
 
-``` CONVOY_DURING_DEBUG = False``` When True and DEBUG=True, ```convoy``` template tag returns processed file urls for each asset path (e.g. 'myfile.css' becomes 'myfile.fb12a26e32dc.cmin.css').  When CONVOY_DURING_DEBUG = False and DEBUG = True, ```convoy``` template tag returns the url to the original, unprocessed, file (e.g. 'myfile.css' stays 'myfile.css')
+` CONVOY_DURING_DEBUG = False` When True and DEBUG=True, `convoy` template tag returns processed file urls for each asset path (e.g. 'myfile.css' becomes 'myfile.fb12a26e32dc.cmin.css').  When CONVOY_DURING_DEBUG = False and DEBUG = True, `convoy` template tag returns the url to the original, unprocessed, file (e.g. 'myfile.css' stays 'myfile.css')
 
 NB:  Using CONVOY_DURING_DEBUG requires additional setup.  You must 
 
-* run collectstatic locally ```$ python manage.py collectstatic``` 
-* configure an explicit static serving url in your urls.py ```url(r'^static/(?P<path>.*)$', 'django.views.static.serve',{'document_root': settings.STATIC_ROOT})```
-* run runserver with the ```--nostatic``` option ```$ python manage.py runserver --nostatic``` 
+* run collectstatic locally `$ python manage.py collectstatic` 
+* configure an explicit static serving url in your urls.py `url(r'^static/(?P<path>.*)$', 'django.views.static.serve',{'document_root': settings.STATIC_ROOT})`
+* run runserver with the `--nostatic` option `$ python manage.py runserver --nostatic` 
 
-``` CARPOOL_COMBINE_DURING_DEBUG = False``` When True and DEBUG = True, ```carpool``` template tag will concatenates files.  To use this setting, you must set CONVOY_DURING_DEBUG to True.  When CARPOOL_COMBINE_DURING_DEBUG = False and DEBUG = True, ```carpool``` template tag renders each asset path into individual <link rel='stylesheet' href="..." > or <script type="text/javascript" src="..."></script> tags without concatenating them.  
+` CARPOOL_COMBINE_DURING_DEBUG = False` When True and DEBUG = True, `carpool` template tag will concatenates files.  To use this setting, you must set CONVOY_DURING_DEBUG to True.  When CARPOOL_COMBINE_DURING_DEBUG = False and DEBUG = True, `carpool` template tag renders each asset path into individual `<link rel='stylesheet' href="..." >` or `<script type="text/javascript" src="..."></script>` tags without concatenating them.  
 
 
 ##### Settings unlikely going to need:
 
-```CONVOY_CONSERVATIVE_MSIE_GZIP = False``` If set to True, will never attempt to serve gziped files to MSIE identified browsers. You are unlikely to need this unless you're writing your own subclasses that gzip more than just js and css files 
+`CONVOY_CONSERVATIVE_MSIE_GZIP = False` If set to True, will never attempt to serve gziped files to MSIE identified browsers. You are unlikely to need this unless you're writing your own subclasses that gzip more than just js and css files 
     
-```CONVOY_AWS_QUERYSTRING_AUTH = False``` Convoy is known to break if you set this to True -- don't.  We have a special file here so you can still use querystring  auth in your media files if you want to.
+`CONVOY_AWS_QUERYSTRING_AUTH = False` Convoy is known to break if you set this to True -- don't.  We have a special file here so you can still use querystring  auth in your media files if you want to.
 
 
 ### Development setup
