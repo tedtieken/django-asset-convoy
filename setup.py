@@ -1,7 +1,7 @@
 import os
 from setuptools import setup
 
-description = 'Asset packager for heroku/s3-hosted Django applications'
+description = 'Asset packager for Django applications'
 try:
     import pypandoc
     long_description = pypandoc.convert('README.md', 'rst')
