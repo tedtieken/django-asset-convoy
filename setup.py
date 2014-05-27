@@ -5,6 +5,7 @@ description = 'Asset packager for heroku/s3-hosted Django applications'
 try:
     import pypandoc
     long_description = pypandoc.convert('README.md', 'rst')
+    print long_description
 except (IOError, ImportError):
     print "ioerror or importerror"
     long_description = description
@@ -17,7 +18,7 @@ setup(
     packages=['convoy'],
     scripts=[],
     url='',
-    license='license',
+    license='MIT',
     description=description,
     long_description=long_description,
     install_requires=[
