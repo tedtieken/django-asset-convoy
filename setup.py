@@ -21,7 +21,8 @@ setup(
     description=description,
     long_description=long_description,
     install_requires=[
-        "Django >= 1.7.0",
+        # "Django >= 1.7.0",
+        # TODO update this when either: Django 1.7 is released or we have django 1.6 support
         "django-s3-folder-storage >= 0.2",
         "cssmin >= 0.2.0",
         "rjsmin >= 1.0.9",

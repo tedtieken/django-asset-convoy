@@ -244,4 +244,7 @@ NB:  Using CONVOY_DURING_DEBUG requires additional setup.  You must
 
 ### Development setup
 
-Requires pandoc [https://github.com/jgm/pandoc/releases](https://github.com/jgm/pandoc/releases)
+Requires pandoc [https://github.com/jgm/pandoc/releases](https://github.com/jgm/pandoc/releases) for registering on pypi.
+
+If you want to include convoy locally, use `pip install -e /path/to/convoy/`
+
