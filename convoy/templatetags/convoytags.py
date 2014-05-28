@@ -18,10 +18,11 @@ CARPOOL_COMBILE_DURING_REQUEST = getattr(settings, "CARPOOL_COMBINE_DURING_REQUE
 if settings.DEBUG and CARPOOL_COMBINE_DURING_DEBUG and not CONVOY_DURING_DEBUG:
     raise ImproperlyConfigured("When DEBUG=True and CARPOOL_COMBINE_DURING_DEBUG=True, you must also set CONVOY_DURING_DEBUG=True")
 
+# TODO: Are the following constants used anywhere else and need to be imported?  I'd prefer to have them in the Convoy/Carpool classes otherwise.
 CARPOOL_CSS_TEMPLATE = getattr(settings, "CARPOOL_CSS_TEMPLATE", u'<link rel="stylesheet" href="%s" >\n')
 CARPOOL_JS_TEMPLATE  = getattr(settings, "CARPOOL_JS_TEMPLATE", u'<script type="text/javascript" src="%s" ></script>\n')
-CARPOOL_START_COMMENT_TEMPLATE = getattr(settings, "CARPOOL_START_COMMENT_TEMPLATE", u"\n<!-- %s -->\n")
-CARPOOL_END_COMMENT_TEMPLATE = getattr(settings, "CARPOOL_END_COMMENT_TEMPLATE", CARPOOL_START_COMMENT_TEMPLATE)
+CARPOOL_START_COMMENT_TEMPLATE = getattr(settings, "CARPOOL_START_COMMENT_TEMPLATE", u"\n<!-- BEGIN %s -->\n")
+CARPOOL_END_COMMENT_TEMPLATE = getattr(settings, "CARPOOL_END_COMMENT_TEMPLATE", u"\n<!-- END %s -->\n")
 
 
 register = template.Library()
@@ -54,13 +55,18 @@ def do_convoy(parser, token):
 
 
 class CarpoolNode(template.Node):
+    validFormats = ['css', 'js']
+
     def __init__(self, nodelist, format, storage=None):
         if not storage:
             self.storage = staticfiles_storage
         self.nodelist = nodelist
         self.format = format
-        
+        if self.format not in validFormats:
+            raise Exception('Not a valid format.')
+
     def resolve_paths_to_combine(self, paths):
+        ''' TODO(ted): describe what this does.'''
         convoyable_paths = []
         unconvoyable_paths = []
         for p in paths:
@@ -75,11 +81,10 @@ class CarpoolNode(template.Node):
         return convoyable_paths, unconvoyable_paths     
         
     def comment_key_in_cache(self, comment_key):
-        storage = self.storage
-        if hasattr(storage, 'get_next_link'):
+        if hasattr(self.storage, 'get_next_link'):
             # First check in the convoy project's storages
             return self.storage.get_next_link(comment_key) 
-        elif hasattr(storage, 'hashed_files'):
+        elif hasattr(self.storage, 'hashed_files'):
             # Fallback to staticfiles default method
             # This _should_ allow the tag to be used with CachedFilesMixin, 
             # but that hasn't been tested or confirmed yet
@@ -102,36 +107,33 @@ class CarpoolNode(template.Node):
         in_cache = self.comment_key_in_cache(comment_key) 
         
         # Part 1: compression work
-        if CARPOOL_COMBILE_DURING_REQUEST: 
-            if settings.DEBUG and not CARPOOL_COMBINE_DURING_DEBUG: 
-                unconvoyable_paths = paths
-            else:
-                if in_cache:
-                    compressed_file_name = in_cache
-                else:
-                    #Combine the if we can
-                    compressed_file_name = concatenate_and_hash(convoyable_paths, comment_key, self.format)
+        if settings.DEBUG and not CARPOOL_COMBINE_DURING_DEBUG: 
+            unconvoyable_paths = paths
+        elif in_cache:
+            compressed_file_name = in_cache
+        elif CARPOOL_COMBILE_DURING_REQUEST:
+            #Combine the if we can
+            compressed_file_name = concatenate_and_hash(convoyable_paths, comment_key, self.format)
         else:
-            if in_cache:
-                compressed_file_name = in_cache
-            else:
-                #TODO: create mechanisms for enqueuing this to be compressed after the request
-                # celery, monkey patched close
-                unconvoyable_paths = paths
+            #TODO: create mechanisms for enqueuing this to be compressed after the request
+            # celery, monkey patched close
+            unconvoyable_paths = paths
         
         # Part 2: rendering work
-        out = CARPOOL_START_COMMENT_TEMPLATE % comment_key if CARPOOL_START_COMMENT_TEMPLATE else ""
-        if not compressed_file_name:
-            #We couldn't compress for some reason, render all files individually
-            unconvoyable_paths = paths
-        else:
+        if compressed_file_name:
             out += self.tag_for_filename(compressed_file_name, context)
+
         # Part 2b: failsafe rendering work
         # Unconveyable paths is our fallback, anything that was uncompressable or 
         # failed compression gets added individually
         for path in unconvoyable_paths: 
             out += self.tag_for_filename(path, context)
-        out += CARPOOL_END_COMMENT_TEMPLATE % comment_key if CARPOOL_END_COMMENT_TEMPLATE else ""
+
+        out = "%s%s%s" % (
+            CARPOOL_START_COMMENT_TEMPLATE % comment_key if CARPOOL_START_COMMENT_TEMPLATE else "",
+            out,
+            CARPOOL_END_COMMENT_TEMPLATE % comment_key if CARPOOL_END_COMMENT_TEMPLATE else "",
+        )
 
         return out
 
