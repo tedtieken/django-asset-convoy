@@ -24,14 +24,16 @@ class GzipHttpOnlyMiddleware(object):
             if "msie" in request.META.get('HTTP_USER_AGENT', '').lower():
                 return response
         
-        if request.scheme is 'https':
-          return response
+        if hasattr(request, 'scheme') and request.scheme is 'https':
+            # scheme property wasn't added until late 2013
+            # https://code.djangoproject.com/ticket/7603
+            return response
           
         if request.is_secure():
-          return response
+            return response
         
         if request.META.get("HTTP_X_FORWARDED_PROTO", "") == 'https':
-          return response
+            return response
           
         return self.gzip_middleware.process_response(request, response)
     

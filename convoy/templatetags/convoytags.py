@@ -86,6 +86,9 @@ class CarpoolNode(template.Node):
             return self.storage.hashed_files.get(comment_key)
         return False
         
+    def create_comment_key(self, paths):
+        return u"+++".join([convoy_terminus(x, gzip=False).split("/")[-1] for x in paths])
+        
     def tag_for_filename(self, file_name, context):
         if self.format == "css":
             return CARPOOL_CSS_TEMPLATE % convoy_from_context(file_name, context) 
@@ -98,7 +101,7 @@ class CarpoolNode(template.Node):
         paths = [x.strip(' \'"\r') for x in node_text.split('\n') if bool(x.strip())]
         convoyable_paths, unconvoyable_paths = self.resolve_paths_to_combine(paths)
         compressed_file_name = None
-        comment_key = u"+++".join(convoyable_paths)
+        comment_key = self.create_comment_key(convoyable_paths)
         in_cache = self.comment_key_in_cache(comment_key) 
         
         # Part 1: compression work

@@ -1,3 +1,4 @@
+NB:  This package is experimental pre-alpha software.  The convoy features are more mature than the carpool features. 
 
 Rationale:
 ---------
@@ -19,6 +20,8 @@ The `carpool` template tag that does concatenation is extremely simple (see belo
 
 You get automatic static asset management best practices for about five minutes of one-time configuration.  
 
+NB: convoy's post processing makes the collectstatic command take about twice as long to run.  If you have a lot of unchanged static assets, this can make pushing small changes to Heroku somewhat painful -- ```heroku config:set DISABLE_COLLECTSTATIC=1``` may come in handy if that is the case.
+
 Speed:
 ---------
 With convoy, your pages load faster.  Sometimes a lot faster.  
@@ -26,6 +29,7 @@ With convoy, your pages load faster.  Sometimes a lot faster.
 In initial tests with heroku and s3, using `convoy` and `carpool` sped up DocumentReady times from ~1500 milliseconds average to 546 milliseconds average.  (Google's homepage by hit DocumentReady in 341ms average).  Method: Middle 8 of 10 page loads measured without caching by chrome devtools.  GTmetrix performance reports went from 91%/78% to 99%/98%.  
 
 More tests pending.
+
 
 
 What:

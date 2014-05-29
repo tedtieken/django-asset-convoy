@@ -34,17 +34,20 @@ class CssAbsolute(object):
     def __init__(self, storage=None, *args, **kwargs):
         if not storage:
             storage = staticfiles_storage
-        if hasattr(storage, "_local"):
-            #For cached s3 storage
-            self.storage = storage._local
-        else:
-            self.storage = storage
+        self.storage = storage
         self.utime = int(time.time())
 
     def get_and_process(self, path, *args, **kwargs):
         with self.storage.open(path) as f:
             self.content = f.read().decode(settings.FILE_CHARSET)
-        self.abs_path = self.storage.path(path)
+        if hasattr(self.storage, "_local"):
+            #Special case for CachedS3 storages
+            #S3 storage doesn't implement the `path` method
+            self.abs_path = self.storage._local.path(path)
+            self.storage_location = self.storage._local.location
+        else:
+            self.abs_path = self.storage.path(path)
+            self.storage_location = self.storage.location
         self.relative_dir = os.path.dirname(self.abs_path)
         return SRC_PATTERN.sub(self.src_converter,
             URL_PATTERN.sub(self.url_converter, self.content))
@@ -79,7 +82,7 @@ class CssAbsolute(object):
         elif url.startswith(DATA_SCHEMES):
             return "url('%s')" % url
         abs_resolved_path = posixpath.normpath('/'.join([str(self.relative_dir), url]))
-        resolved_path = abs_resolved_path.split(self.storage.location, 1)[-1]
+        resolved_path = abs_resolved_path.split(self.storage_location, 1)[-1]
         if hasattr(self.storage, "get_terminal_url"):
             full_url = self.storage.get_terminal_url(resolved_path.lstrip("/"))
         else:
