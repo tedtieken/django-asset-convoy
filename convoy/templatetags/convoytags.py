@@ -9,6 +9,7 @@ from django.core.exceptions import ImproperlyConfigured
 
 from convoy.utils import CssAbsolute, concatenate_and_hash
 from convoy.utils import request_accepts_gzip, convoy_terminus, convoy_chain, convoy_from_context
+# from convoy import settings
 
 CONVOY_DURING_DEBUG = getattr(settings, "CONVOY_DURING_DEBUG", False)
 CARPOOL_COMBINE_DURING_DEBUG = getattr(settings, "CARPOOL_COMBINE_DURING_DEBUG", False)
@@ -26,7 +27,7 @@ CARPOOL_END_COMMENT_TEMPLATE = getattr(settings, "CARPOOL_END_COMMENT_TEMPLATE",
 
 
 register = template.Library()
-
+ 
 
 class ConvoyStaticNode(StaticFilesNode):
     def url(self, context):

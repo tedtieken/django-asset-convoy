@@ -181,7 +181,7 @@ def convoy_terminus(path, dry_mode=False, gzip=False, storage=None):
     if hasattr(storage, "get_terminal_url"):
         return storage.get_terminal_url(path, dry_mode, gzip)
     return storage.url(path) 
-    
+
 def convoy_chain(path, dry_mode=False, gzip=False, storage=None):
     if not storage:
         storage = staticfiles_storage
@@ -190,6 +190,7 @@ def convoy_chain(path, dry_mode=False, gzip=False, storage=None):
     return [storage.url(path)]
 
 def convoy_from_context(path, context, storage=None):
+    ''' TODO: This is the first method to be called from convoytags, so we should describe it.'''
     if not storage:
         storage = staticfiles_storage    
     dry_mode = False
