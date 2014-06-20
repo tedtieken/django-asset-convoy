@@ -16,15 +16,7 @@ def findtests():
 
     if "DJANGO_SETTINGS_MODULE" not in os.environ:
         os.environ['DJANGO_SETTINGS_MODULE'] = 'tests.test_sqlite'
-    # options.settings = os.environ['DJANGO_SETTINGS_MODULE']
 
-    # print suite
-    # for s in suite:
-    #     print dir(s)
-    #     print s.__module__
-    
-    # import ipdb
-    # ipdb.set_trace()
     unittest.TextTestRunner().run(suite)
 
 

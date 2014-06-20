@@ -1,13 +1,6 @@
 import unittest
 from convoy.tests.adminscript import AdminScriptTestCase
 
-print AdminScriptTestCase
-
-# Create your tests here.
-
-class Derp(unittest.TestCase):
-    def test_derp(self):
-        assert 2 == 1+1
 
 class ManageRunserverEmptyAllowedHosts(AdminScriptTestCase):
     def setUp(self):
@@ -26,7 +19,7 @@ class ManageRunserverEmptyAllowedHosts(AdminScriptTestCase):
                 }
             },
         })
-        
+
 
     def tearDown(self):
         self.remove_settings('settings.py')
@@ -36,5 +29,13 @@ class ManageRunserverEmptyAllowedHosts(AdminScriptTestCase):
         self.assertNoOutput(out)
         self.assertOutput(err, 'CommandError: You must set settings.ALLOWED_HOSTS if DEBUG is False.')
 
+    def test_collectstatic(self):
 
+        self.write_settings('settings.py', sdict={
+            'STATIC_ROOT': "'/static/'",
+            'STATIC_URL': "'/static/'"
+            })
+        out, err = self.run_manage(['collectstatic'])
+        self.assertNoOutput(err)
+        print out
 
