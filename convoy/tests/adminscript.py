@@ -68,7 +68,7 @@ class AdminScriptTestCase(unittest.TestCase):
                     settings_file.write("%s = %s\n" % (s, o))
 
             if apps is None:
-                apps = ['django.contrib.auth', 'django.contrib.contenttypes', 'admin_scripts']
+                apps = ['django.contrib.auth', 'django.contrib.contenttypes', 'tests.admin_scripts']
 
             settings_file.write("INSTALLED_APPS = %s\n" % apps)
 
@@ -105,8 +105,8 @@ class AdminScriptTestCase(unittest.TestCase):
         """
         paths = []
         first_package_re = re.compile(r'(^[^\.]+)\.')
-        import ipdb
-        ipdb.set_trace()
+        # import ipdb
+        # ipdb.set_trace()
         for backend in settings.DATABASES.values():
             result = first_package_re.findall(backend['ENGINE'])
             if result and result != ['django']:

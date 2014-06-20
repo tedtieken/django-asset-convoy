@@ -12,8 +12,19 @@ TEMP_DIR = tempfile.mkdtemp(prefix='django_')
 os.environ['DJANGO_TEST_TEMP_DIR'] = TEMP_DIR
 
 def findtests():
-    suite = unittest.defaultTestLoader.discover('tests', '*.py', PROJECT_PATH)
-    print suite
+    suite = unittest.defaultTestLoader.discover('tests', 'tests.py', PROJECT_PATH)
+
+    if "DJANGO_SETTINGS_MODULE" not in os.environ:
+        os.environ['DJANGO_SETTINGS_MODULE'] = 'tests.test_sqlite'
+    # options.settings = os.environ['DJANGO_SETTINGS_MODULE']
+
+    # print suite
+    # for s in suite:
+    #     print dir(s)
+    #     print s.__module__
+    
+    # import ipdb
+    # ipdb.set_trace()
     unittest.TextTestRunner().run(suite)
 
 
