@@ -12,11 +12,21 @@ class Derp(unittest.TestCase):
 class ManageRunserverEmptyAllowedHosts(AdminScriptTestCase):
     def setUp(self):
         print "setting up..."
+
+        # this is not properly setting these things up
         self.write_settings('settings.py', sdict={
             'ALLOWED_HOSTS': [],
             'DEBUG': False,
-            'DATABASES': [],
+            'DATABASES': {
+                'default': {
+                    'ENGINE': 'django.db.backends.sqlite3'
+                },
+                'other': {
+                    'ENGINE': 'django.db.backends.sqlite3',
+                }
+            },
         })
+        
 
     def tearDown(self):
         self.remove_settings('settings.py')
