@@ -76,6 +76,11 @@ class AdminScriptTestCase(unittest.TestCase):
                 for k, v in sdict.items():
                     settings_file.write("%s = %s\n" % (k, v))
 
+    def cat_settings(self, filename):
+        settings_file_path = os.path.join(test_dir, filename)
+        with open(settings_file_path, 'r') as settings_file:
+            print settings_file.read()
+
     def remove_settings(self, filename, is_dir=False):
         full_name = os.path.join(test_dir, filename)
         if is_dir:
