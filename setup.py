@@ -12,7 +12,7 @@ except (IOError, ImportError):
 
 print """
 WARNING
-  Django 1.7 is as dependency for this application, but it has not been released and
+  Django 1.7 is a dependency for this application, but it has not been released and
   cannot be installed using pypi's `install_requires`.  Install it on your own using:
 
     pip install git+https://github.com/django/django.git@stable/1.7.x
