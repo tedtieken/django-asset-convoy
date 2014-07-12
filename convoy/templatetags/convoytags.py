@@ -9,15 +9,8 @@ from django.core.exceptions import ImproperlyConfigured
 
 from convoy.utils import CssAbsolute, concatenate_and_hash
 from convoy.utils import request_accepts_gzip, convoy_terminus, convoy_chain, convoy_from_context
-# from convoy import settings
 
-CONVOY_DURING_DEBUG = getattr(settings, "CONVOY_DURING_DEBUG", False)
-CARPOOL_COMBINE_DURING_DEBUG = getattr(settings, "CARPOOL_COMBINE_DURING_DEBUG", False)
-CARPOOL_PATH_FRAGMENT = getattr(settings, "CARPOOL_CACHE_PATH_FRAGMENT", "CARPOOL")
-CARPOOL_COMBINE_ORIGINALS = getattr(settings, "CARPOOL_COMBINE_ORIGINALS", False)
-CARPOOL_COMBILE_DURING_REQUEST = getattr(settings, "CARPOOL_COMBINE_DURING_REQUEST", True)
-if settings.DEBUG and CARPOOL_COMBINE_DURING_DEBUG and not CONVOY_DURING_DEBUG:
-    raise ImproperlyConfigured("When DEBUG=True and CARPOOL_COMBINE_DURING_DEBUG=True, you must also set CONVOY_DURING_DEBUG=True")
+from convoy import settings as convoysettings
 
 # TODO: Are the following constants used anywhere else and need to be imported?  I'd prefer to have them in the Convoy/Carpool classes otherwise.
 CARPOOL_CSS_TEMPLATE = getattr(settings, "CARPOOL_CSS_TEMPLATE", u'<link rel="stylesheet" href="%s" >\n')
@@ -73,7 +66,7 @@ class CarpoolNode(template.Node):
         for p in paths:
             chain = convoy_chain(p, gzip=False) #can't concatenate gziped files
             if chain:
-                if CARPOOL_COMBINE_ORIGINALS:
+                if convoysettings.CARPOOL_COMBINE_ORIGINALS:
                     convoyable_paths.append(chain[0])
                 else:
                     convoyable_paths.append(chain[-1])
@@ -111,11 +104,11 @@ class CarpoolNode(template.Node):
         in_cache = self.comment_key_in_cache(comment_key) 
         
         # Part 1: compression work
-        if settings.DEBUG and not CARPOOL_COMBINE_DURING_DEBUG: 
+        if settings.DEBUG and not convoysettings.CARPOOL_COMBINE_DURING_DEBUG: 
             unconvoyable_paths = paths
         elif in_cache:
             compressed_file_name = in_cache
-        elif CARPOOL_COMBILE_DURING_REQUEST:
+        elif convoysettings.CARPOOL_COMBILE_DURING_REQUEST:
             #Combine the if we can
             compressed_file_name = concatenate_and_hash(convoyable_paths, comment_key, self.format)
         else:

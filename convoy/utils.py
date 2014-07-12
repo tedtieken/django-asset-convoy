@@ -11,18 +11,13 @@ import posixpath
 import time
 import hashlib
 
-CONVOY_DURING_DEBUG = getattr(settings, "CONVOY_DURING_DEBUG", False)
-#TODO, find a better name for CONVOY_GZIP_IN_TEMPLATE
-CONVOY_GZIP_IN_TEMPLATE = getattr(settings, "CONVOY_GZIP_IN_TEMPLATE", True)
-CONVOY_CONSERVATIVE_MSIE_GZIP = getattr(settings, "CONVOY_CONSERVATIVE_MSIE_GZIP", False)
-CARPOOL_PATH_FRAGMENT = getattr(settings, "CARPOOL_CACHE_PATH_FRAGMENT", "CARPOOL")
-
 URL_PATTERN = re.compile(r'url\(([^\)]+)\)')
 SRC_PATTERN = re.compile(r'src=([\'"])(.+?)\1')
 OFFSITE_SCHEMES = ('http://', 'https://', '//')
 ABSOLUTE_SCHEMES = ('/')
 DATA_SCHEMES = ('data:', '#')
 
+from convoy import settings as convoysettings
 
 class CssAbsolute(object):
     '''
@@ -124,7 +119,7 @@ def concatenate_and_hash(paths, comment_key, format, storage=None, fail_loudly=F
             hashed_name = hashlib.md5()
             for chunk in content.chunks():
                 hashed_name.update(chunk)        
-        file_name = CARPOOL_PATH_FRAGMENT + u"/" + hashed_name + u"." + format
+        file_name = convoysettings.CARPOOL_PATH_FRAGMENT + u"/" + hashed_name + u"." + format
 
         #Save it
         if storage.exists(file_name):
@@ -166,7 +161,7 @@ def concatenate_and_hash(paths, comment_key, format, storage=None, fail_loudly=F
 def request_accepts_gzip(request):
     # MSIE has issues with gzipped response of various content types
     # but, if we're only gzipping text/css and javascript, we should be ok
-    if CONVOY_CONSERVATIVE_MSIE_GZIP:
+    if convoysettings.CONVOY_CONSERVATIVE_MSIE_GZIP:
         if "msie" in request.META.get('HTTP_USER_AGENT', '').lower():
             return False
     ae = request.META.get('HTTP_ACCEPT_ENCODING', '')
@@ -196,7 +191,7 @@ def convoy_from_context(path, context, storage=None):
     dry_mode = False
     gzip = False
     if settings.DEBUG:
-        if CONVOY_DURING_DEBUG:
+        if convoysettings.CONVOY_DURING_DEBUG:
             #NB: using this setting requires 
             # $ python manage.py runserver --nostatic
             # with an explicit static serving urls.py 
@@ -205,7 +200,7 @@ def convoy_from_context(path, context, storage=None):
             dry_mode = False
         else:
             dry_mode = True
-    if CONVOY_GZIP_IN_TEMPLATE:
+    if convoysettings.CONVOY_GZIP_IN_TEMPLATE:
         if context.has_key('request'):
             if request_accepts_gzip(context['request']):
                 gzip=True

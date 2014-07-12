@@ -1,7 +1,7 @@
 from django.middleware.gzip import GZipMiddleware
 from django.conf import settings
 
-CONVOY_CONSERVATIVE_MSIE_GZIP = getattr(settings, "CONVOY_CONSERVATIVE_MSIE_GZIP", False)
+from convoy import settings as convoysettings
 
 class GzipHttpOnlyMiddleware(object):
     '''
@@ -20,7 +20,7 @@ class GzipHttpOnlyMiddleware(object):
         self.gzip_middleware = GZipMiddleware(*args, **kwargs) 
     
     def process_response(self, request, response):
-        if CONVOY_CONSERVATIVE_MSIE_GZIP:
+        if convoysettings.CONVOY_CONSERVATIVE_MSIE_GZIP:
             if "msie" in request.META.get('HTTP_USER_AGENT', '').lower():
                 return response
         
