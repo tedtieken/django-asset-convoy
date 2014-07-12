@@ -3,6 +3,7 @@ from django.core.management.base import CommandError
 from django.contrib.staticfiles.management.commands import collectstatic, runserver
 from collections import OrderedDict
 
+import convoy.settings
 
 orig_collect = collectstatic.Command.collect
 def new_collect(self, *args, **kwargs):
@@ -30,7 +31,7 @@ def new_run(self, *args, **kwargs):
     '''
     
     if settings.DEBUG:
-      if getattr(settings, 'CONVOY_DURING_DEBUG', False):
+      if convoy.settings.CONVOY_DURING_DEBUG:
         if kwargs.get('use_static_handler', True):
           raise CommandError(runserver_error_message)
     return orig_run(self, *args, **kwargs) 
