@@ -119,6 +119,7 @@ class MinifyMixin(object):
             return cssmin.cssmin(original_file.read())
         elif file_type == "js":
             return jsmin(original_file.read(), keep_bang_comments=True)
+            # TODO: why are these commented out?
             #return _rjsmin.jsmin(str(original_file.read()), keep_bang_comments=True)
             #return uglipyjs.compile(original_file.read())
             #return slimit.minify(original_file.read())
