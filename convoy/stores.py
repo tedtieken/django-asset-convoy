@@ -25,7 +25,7 @@ except ImportError:
         def jsmin(string, *args, **kwargs):
             return _jsmin(string)
 
-from convoy import settings as convoysettings
+import convoy.settings
 
 class S3LocalCachedMixin(object):
     """
@@ -33,7 +33,7 @@ class S3LocalCachedMixin(object):
     """
     def __init__(self, *args, **kwargs):
         super(S3LocalCachedMixin, self).__init__(*args, **kwargs)
-        self._local = StaticFilesStorage(location=convoysettings.CONVOY_LOCAL_CACHE_ROOT)
+        self._local = StaticFilesStorage(location=convoy.settings.CONVOY_LOCAL_CACHE_ROOT)
 
     def save(self, name, content, *args, **kwargs):
         if not hasattr(content, 'chunks'):
@@ -155,7 +155,7 @@ class MinifyMixin(object):
                 convoy_min_path = ".".join(convoy_split_path)
                 
                 min_contents = False
-                if convoysettings.CONVOY_USE_EXISTING_MIN_FILES:
+                if convoy.settings.CONVOY_USE_EXISTING_MIN_FILES:
                     #This works best if minification is FIRST OR SECOND in the pipeline
                     # if a minified file exists from the distribution, use it 
                     # we want all bugs in minified code to match the distributed bugs 1 to 1
@@ -336,8 +336,8 @@ class S3ConvoyMixin(object):
     #TODO write a test that fails if our assumptions of S3BotoStorage change
     def __init__(self, *args, **kwargs):
         super(S3ConvoyMixin, self).__init__(*args, **kwargs)
-        self.querystring_auth = convoysettings.CONVOY_AWS_QUERYSTRING_AUTH 
-        self.headers = convoysettings.CONVOY_AWS_HEADERS
+        self.querystring_auth = convoy.settings.CONVOY_AWS_QUERYSTRING_AUTH 
+        self.headers = convoy.settings.CONVOY_AWS_HEADERS
         
     def _save(self, name, content, *args, **kwargs):
         ''' 
