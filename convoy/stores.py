@@ -29,6 +29,7 @@ CONVOY_USE_EXISTING_MIN_FILES = getattr(settings, "CONVOY_USE_EXISTING_MIN_FILES
 CONVOY_AWS_QUERYSTRING_AUTH = getattr(settings, 'CONVOY_AWS_QUERYSTRING_AUTH', True)
 CONVOY_AWS_HEADERS = getattr(settings, 'CONVOY_AWS_HEADERS', {})
 CONVOY_LOCAL_CACHE_ROOT = getattr(settings, 'CONVOY_LOCAL_CACHE_ROOT', getattr(settings, "STATIC_ROOT", ""))
+CONVOY_ALWAYS_PROCESS = getattr(settings, 'CONVOY_ALWAYS_PROCESS', False)
 
 class S3LocalCachedMixin(object):
     """
@@ -82,6 +83,7 @@ class ChainableHashedFilesMixin(HashedFilesMixin):
     Over-rides behavior of HashedFilesMixin to be chainable in our pipeline
     '''
     def post_process(self, paths, dry_run=False, **options):
+        #TODO:  This is broken past django 1.7.beta3
         # Do HashedFilesMixin's proprietary stuff
         if self._should_hash:
             print "starting hash super 1", len(paths)   
@@ -157,35 +159,39 @@ class MinifyMixin(object):
                 convoy_split_path.insert(-1, "cmin")
                 convoy_min_path = ".".join(convoy_split_path)
                 
-                min_contents = False
-                if CONVOY_USE_EXISTING_MIN_FILES:
-                    #This works best if minification is FIRST OR SECOND in the pipeline
-                    # if a minified file exists from the distribution, use it 
-                    # we want all bugs in minified code to match the distributed bugs 1 to 1
-                    split_path = path.split(".")
-                    # Kludge for if there is a hash in the filename
-                    # Tolerable because we falback to minifying it ourselves
-                    # TODO: break this out into a has_hash or has_fingerprint method
-                    #       that looks at the filesystem for the un-hashed file
-                    # TODO: write a test that fails if django increases the hash length
-                    if len(split_path[-2]) == 12 and len(split_path) > 2: 
-                        split_path.pop(-2)
-                    split_path.insert(-1, "min")
-                    dist_min_path = ".".join(split_path)
-                    if self.exists(dist_min_path):
-                        print "Using existing minified file %s" % dist_min_path
-                        #Copy the existing minified file into our name scheme
-                        f = self.open(dist_min_path)
-                        min_contents = f.read()
-                        f.close()
-                if not min_contents:
-                    min_contents = self._min_compress(original_file, convoy_split_path[-1])
-                
+                #This logic requires a fingerprinting step and a fingerpint in the filename to work correctly
+                already_processed = False
                 if self.exists(convoy_min_path):
-                    self.delete(convoy_min_path)
-                saved_name = self.save(convoy_min_path, ContentFile(min_contents))
+                    already_processed = True
+                    if CONVOY_ALWAYS_PROCESS:
+                        self.delete(convoy_min_path)
+                
+                did_processing = False
+                if not already_processed or CONVOY_ALWAYS_PROCESS:
+                    min_contents = False
+                    if CONVOY_USE_EXISTING_MIN_FILES:
+                        # if a minified file exists from the distribution, use it 
+                        # we want all bugs in minified code to match the distributed bugs 1 to 1
+                        split_path = path.split(".")
+                        # Kludge for if there is a hash in the filename
+                        # Tolerable because we falback to minifying it ourselves
+                        # TODO: write a test that fails if django increases the hash length
+                        if len(split_path[-2]) == 12 and len(split_path) > 2: 
+                            split_path.pop(-2)
+                        split_path.insert(-1, "min")
+                        dist_min_path = ".".join(split_path)
+                        if self.exists(dist_min_path):
+                            print "Using existing minified file %s" % dist_min_path
+                            #Copy the existing minified file into our name scheme
+                            f = self.open(dist_min_path)
+                            min_contents = f.read()
+                            f.close()
+                    if not min_contents:
+                        min_contents = self._min_compress(original_file, convoy_split_path[-1])
+                    saved_name = self.save(convoy_min_path, ContentFile(min_contents))
+                    did_processing = True
                 hashed_files[self.hash_key(path)] = convoy_min_path
-                yield path, convoy_min_path, True
+                yield path, convoy_min_path, did_processing
 
         self.hashed_files.update(hashed_files)
 
@@ -229,16 +235,24 @@ class GZIPMixin(object):
             if path:
                 if not matches_patterns(path, self.gzip_patterns):
                     continue
-                original_file = self.open(path)
-                original_file.seek(0)
                 gzipped_path = "{0}.gz".format(path)
-                gzipped_file = self._gzip_compress(original_file)
-                gzipped_file.seek(0)
+
+                already_processed = False
                 if self.exists(gzipped_path):
-                    self.delete(gzipped_path)
-                saved_name = self.save(gzipped_path, gzipped_file)                
+                    already_processed = True
+                    if CONVOY_ALWAYS_PROCESS:
+                        self.delete(gzipped_path)
+                
+                did_processing = False
+                if not already_processed or CONVOY_ALWAYS_PROCESS:                                
+                    original_file = self.open(path)
+                    original_file.seek(0)
+                    gzipped_file = self._gzip_compress(original_file)
+                    gzipped_file.seek(0)
+                    saved_name = self.save(gzipped_path, gzipped_file)                
+                    did_processing = True
                 hashed_files[self.hash_key(path)] = gzipped_path
-                yield path, gzipped_path, True
+                yield path, gzipped_path, did_processing
                 
         self.hashed_files.update(hashed_files)
 
@@ -277,10 +291,11 @@ class ConvoyBase(ChainableManifestFilesMixin, GZIPMixin, MinifyMixin, ChainableH
     '''
     Sets up a storage for convoying assets
      - On collect-static the mixins chain off of post_process
-     - Order is important: ChainableManifestFilesMixin must be first from the left
-     - Order is important: MinifyMixin works best the far right or with directly right of 
-                           ChainableHashedFilesMixin
-     
+     - Order is important: ChainableManifestFilesMixin must on the far left
+     - Order is important: ChainableHashedFilesMixin must on the far right
+     - Order is important: GZipMixin compresses the files in a way that further processing
+                           is impractical
+     - Thus, the order of: Manifest, Gzip, Minify, Hash                      
      - Sets up storage methods to be invoked by the {% convoy %} template tags
     '''
     def _is_gzip_file(self, name):
@@ -347,8 +362,8 @@ class S3ConvoyMixin(object):
         Check to see if we're uploading a gzip file, if so mark it as such for 
         the s3 uplaod
         '''
-        #TODO: check if there is a hash, if there isn't mark the file as private
-        #      this will make it impossible to shoot ourselves in the foot by accidentally serving
+        #TODO: ? check if there is a hash, if there isn't mark the file as private
+        #      this would make it impossible to shoot ourselves in the foot by accidentally serving
         #      non fingerprinted files
         #      ?? is this a good idea?
         
